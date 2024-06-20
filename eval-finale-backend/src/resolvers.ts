@@ -33,6 +33,13 @@ interface LikeArticleArgs {
 
 const resolvers = {
   Query: {
+    me: async (_: {}, args: {}, context: DataSourceContext): Promise<User | null> => {
+      const userId = context.userId;
+      if (!userId) throw new Error('Not authenticated');
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new Error('User not found');
+      return user;
+    },
     users: async (): Promise<User[]> => {
       return await prisma.user.findMany();
     },
@@ -44,12 +51,14 @@ const resolvers = {
     },
   },
   Mutation: {
-    signUp: async (_: {}, args: SignUpArgs): Promise<User> => {
+    signUp: async (_: {}, args: SignUpArgs): Promise<{ user: User; token: string }> => {
       const { username, email, password } = args;
       const hashedPassword = await bcrypt.hash(password, 10);
-      return await prisma.user.create({
+      const user = await prisma.user.create({
         data: { username, email, password: hashedPassword },
       });
+      const token = jwt.sign({ userId: user.id }, APP_SECRET, { expiresIn: '1d' });
+      return { user, token };
     },
     login: async (_: {}, args: LoginArgs): Promise<string> => {
       const { email, password } = args;
@@ -57,7 +66,7 @@ const resolvers = {
       if (!user || !(await bcrypt.compare(password, user.password))) {
         throw new Error('Invalid credentials');
       }
-      return jwt.sign({ userId: user.id }, APP_SECRET, { expiresIn: '1h' });
+      return jwt.sign({ userId: user.id }, APP_SECRET, { expiresIn: '1d' });
     },
     createArticle: async (_: {}, args: CreateArticleArgs, context: DataSourceContext): Promise<Article> => {
       const { title, content } = args;

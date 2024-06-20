@@ -78,6 +78,7 @@ export type Query = {
   __typename?: 'Query';
   article?: Maybe<Article>;
   articles: Array<Article>;
+  me?: Maybe<User>;
   users: Array<User>;
 };
 
@@ -218,6 +219,7 @@ export type MutationResolvers<ContextType = DataSourceContext, ParentType extend
 export type QueryResolvers<ContextType = DataSourceContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   article?: Resolver<Maybe<ResolversTypes['Article']>, ParentType, ContextType, RequireFields<QueryArticleArgs, 'id'>>;
   articles?: Resolver<Array<ResolversTypes['Article']>, ParentType, ContextType>;
+  me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   users?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
 };
 

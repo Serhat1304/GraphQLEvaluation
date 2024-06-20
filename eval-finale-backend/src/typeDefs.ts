@@ -25,6 +25,7 @@ export const typeDefs = gql`
   }
 
   type Query {
+    me: User
     users: [User!]!
     articles: [Article!]!
     article(id: ID!): Article

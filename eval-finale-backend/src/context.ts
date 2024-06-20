@@ -18,7 +18,6 @@ export const context = ({ req }: { req: Request }): DataSourceContext => {
       const payload = verify(token.replace('Bearer ', ''), APP_SECRET);
       userId = (payload as { userId: number }).userId;
     } catch {
-      // Handle token verification errors
     }
   }
   return { prisma, userId };
