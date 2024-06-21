@@ -17,9 +17,15 @@ export const context = ({ req }: { req: Request }): DataSourceContext => {
     try {
       const payload = verify(token.replace('Bearer ', ''), APP_SECRET);
       userId = (payload as { userId: number }).userId;
-    } catch {
+    } catch (e) {
+      if (e instanceof Error) {
+        if (e.name === 'TokenExpiredError') {
+          console.warn('Token expired:', e.message);
+        } else {
+          console.error('Token verification error:', e.message);
+        }
+      }
     }
   }
   return { prisma, userId };
 };
-

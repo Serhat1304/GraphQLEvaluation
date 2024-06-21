@@ -32,10 +32,16 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    signUp(username: String!, email: String!, password: String!): User!
+    signUp(username: String!, email: String!, password: String!): AuthPayload!
     login(email: String!, password: String!): String!
     createArticle(title: String!, content: String!): Article!
     createComment(articleId: ID!, content: String!): Comment!
     likeArticle(articleId: ID!): Article!
   }
+  
+  type AuthPayload {
+    token: String!
+    user: User!
+  }
+
 `;
