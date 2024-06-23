@@ -122,7 +122,7 @@ export default function Header() {
                 <ListItemIcon>
                   <Settings fontSize="small" />
                 </ListItemIcon>
-                <Link href="/">
+                <Link href="/account">
                   <p className="text-sm">Profile</p>
                 </Link>
               </MenuItem>

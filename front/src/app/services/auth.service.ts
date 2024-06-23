@@ -38,6 +38,12 @@ const GET_USER_QUERY = gql`
       id
       username
       email
+      articles {
+        id
+        content
+        title
+        likes
+      }
     }
   }
 `
