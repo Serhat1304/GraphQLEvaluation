@@ -1,3 +1,4 @@
+import { getCookie } from "cookies-next"
 import ApiAuthService from "../services/auth.service"
 import { useMutation, useQuery } from "react-query"
 
@@ -13,6 +14,6 @@ export const useGetUser = () => {
   return useQuery({
     queryKey: "getProfile",
     queryFn: ApiAuthService.getUser,
-    enabled: false,
+    enabled: !!getCookie("xToken"),
   })
 }

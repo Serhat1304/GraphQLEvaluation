@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import { useQueryClient } from "react-query"
 import { useSignUp } from "@/app/hooks/auth.hooks"
 import { ApolloError } from "@apollo/client"
@@ -7,6 +8,7 @@ import { setCookie } from "cookies-next"
 export default function SignUp() {
   const queryClient = useQueryClient()
   const signUp = useSignUp()
+  const [error, setError] = useState<string | null>(null)
 
   const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -19,12 +21,14 @@ export default function SignUp() {
     signUp.mutate(
       { username: name, email: email, password: password },
       {
-        onSuccess: (data: any) => {
+        onSuccess: (data) => {
           queryClient.invalidateQueries("getProfile")
-          console.log(data)
+          setCookie("xToken", data.signUp.token)
+          window.location.href = "/"
+          console.log(data.signUp.token)
         },
         onError: (error: ApolloError | unknown) => {
-          error instanceof ApolloError ? console.error(error.message) : console.error(error)
+          error instanceof ApolloError ? setError(error.message) : console.error(error)
         },
       },
     )
@@ -88,6 +92,7 @@ export default function SignUp() {
             Sign Up
           </button>
         </div>
+        {error && <div className="text-sm text-center text-red-500">{error}</div>}
       </form>
     </div>
   )

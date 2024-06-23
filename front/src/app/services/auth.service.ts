@@ -1,4 +1,5 @@
 import { ApolloClient, InMemoryCache, gql, ApolloError } from "@apollo/client"
+import { getCookie } from "cookies-next"
 
 const client = new ApolloClient({
   uri: "http://localhost:4000/",
@@ -8,20 +9,32 @@ const client = new ApolloClient({
 const SIGN_UP_MUTATION = gql`
   mutation SignUp($username: String!, $email: String!, $password: String!) {
     signUp(username: $username, email: $email, password: $password) {
-      id
+      user {
+        id
+        username
+        email
+      }
+      token
     }
   }
 `
 
 const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
-    login(email: $email, password: $password)
+    login(email: $email, password: $password) {
+      user {
+        id
+        username
+        email
+      }
+      token
+    }
   }
 `
 
 const GET_USER_QUERY = gql`
-  query Users {
-    users {
+  query Query {
+    me {
       id
       username
       email
@@ -46,15 +59,19 @@ const ApiAuthService = {
     return response.data
   },
 
-  getUser: async () => {
-    try {
-      const response = await client.query({
-        query: GET_USER_QUERY,
-      })
-      return response.data
-    } catch (error: ApolloError | unknown) {
-      error instanceof ApolloError ? console.error(error.message) : console.error(error)
-    }
+  async getUser() {
+    const token = getCookie("xToken")
+
+    const response = await client.query({
+      query: GET_USER_QUERY,
+      context: {
+        headers: {
+          Authorization: `${token}`,
+        },
+      },
+    })
+
+    return response.data?.me
   },
 }
 

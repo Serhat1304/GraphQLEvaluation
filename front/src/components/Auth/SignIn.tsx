@@ -3,6 +3,7 @@ import { useQueryClient } from "react-query"
 import { useLogin } from "@/app/hooks/auth.hooks"
 import { ApolloError } from "@apollo/client"
 import { setCookie } from "cookies-next"
+import Link from "next/link"
 
 export default function SignIn() {
   const queryClient = useQueryClient()
@@ -18,7 +19,7 @@ export default function SignIn() {
     login.mutate(
       { email: email, password: pwd },
       {
-        onSuccess: (data: any) => {
+        onSuccess: (data) => {
           queryClient.invalidateQueries("getProfile")
           setCookie("xToken", data.login)
           console.log(data.login)
@@ -79,6 +80,11 @@ export default function SignIn() {
           >
             Sign in
           </button>
+        </div>
+        <div className="text-sm text-center">
+          <Link href="/auth/signUp" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            Create an account
+          </Link>
         </div>
       </form>
     </div>
