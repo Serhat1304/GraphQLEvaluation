@@ -57,16 +57,17 @@ const resolvers = {
       const user = await prisma.user.create({
         data: { username, email, password: hashedPassword },
       });
-      const token = jwt.sign({ userId: user.id }, APP_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ userId: user.id }, APP_SECRET, { expiresIn: '7d' });
       return { user, token };
     },
-    login: async (_: {}, args: LoginArgs): Promise<string> => {
+    login: async (_: {}, args: LoginArgs): Promise<{ user: User; token: string }> => {
       const { email, password } = args;
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user || !(await bcrypt.compare(password, user.password))) {
         throw new Error('Invalid credentials');
       }
-      return jwt.sign({ userId: user.id }, APP_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ userId: user.id }, APP_SECRET, { expiresIn: '7d' });
+      return { user, token };
     },
     createArticle: async (_: {}, args: CreateArticleArgs, context: DataSourceContext): Promise<Article> => {
       const { title, content } = args;
