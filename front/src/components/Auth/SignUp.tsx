@@ -1,7 +1,38 @@
+"use client"
+import { useQueryClient } from "react-query"
+import { useSignUp } from "@/app/hooks/auth.hooks"
+import { ApolloError } from "@apollo/client"
+import { setCookie } from "cookies-next"
+
 export default function SignUp() {
+  const queryClient = useQueryClient()
+  const signUp = useSignUp()
+
+  const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+    const name = formData.get("name") as string
+
+    signUp.mutate(
+      { username: name, email: email, password: password },
+      {
+        onSuccess: (data: any) => {
+          queryClient.invalidateQueries("getProfile")
+          console.log(data)
+        },
+        onError: (error: ApolloError | unknown) => {
+          error instanceof ApolloError ? console.error(error.message) : console.error(error)
+        },
+      },
+    )
+  }
+
   return (
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form className="space-y-6" action="#" method="POST">
+      <form className="space-y-6" action="#" method="POST" onSubmit={handleSignUp}>
         <div>
           <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
             Username

@@ -1,47 +1,61 @@
-import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
+import { ApolloClient, InMemoryCache, gql, ApolloError } from "@apollo/client"
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql",
+  uri: "http://localhost:4000/",
   cache: new InMemoryCache(),
 })
 
 const SIGN_UP_MUTATION = gql`
   mutation SignUp($username: String!, $email: String!, $password: String!) {
     signUp(username: $username, email: $email, password: $password) {
-      // Ajoutez les champs que vous souhaitez retourner après la mutation
+      id
     }
   }
 `
 
 const LOGIN_MUTATION = gql`
-  mutation Login($loginEmail2: String!, $loginPassword2: String!) {
-    login(email: $loginEmail2, password: $loginPassword2)
+  mutation Login($email: String!, $password: String!) {
+    login(email: $email, password: $password)
   }
 `
 
-const apiAuthService = {
-  async signUp(username: string, email: string, password: string) {
-    try {
-      const response = await client.mutate({
-        mutation: SIGN_UP_MUTATION,
-        variables: { username, email, password },
-      })
-      return response.data
-    } catch (error: any) {
-      throw new Error("Erreur lors de l'inscription : " + error?.message)
+const GET_USER_QUERY = gql`
+  query Users {
+    users {
+      id
+      username
+      email
     }
+  }
+`
+
+const ApiAuthService = {
+  async signUp(payload: { username: string; email: string; password: string }) {
+    const response = await client.mutate({
+      mutation: SIGN_UP_MUTATION,
+      variables: payload,
+    })
+    return response.data
   },
 
-  async login(email: string, password: string) {
+  async login(payload: { email: string; password: string }) {
+    const response = await client.mutate({
+      mutation: LOGIN_MUTATION,
+      variables: payload,
+    })
+    return response.data
+  },
+
+  getUser: async () => {
     try {
-      const response = await client.mutate({
-        mutation: LOGIN_MUTATION,
-        variables: { loginEmail2: email, loginPassword2: password },
+      const response = await client.query({
+        query: GET_USER_QUERY,
       })
       return response.data
-    } catch (error: any) {
-      throw new Error("Erreur lors de la connexion : " + error.message)
+    } catch (error: ApolloError | unknown) {
+      error instanceof ApolloError ? console.error(error.message) : console.error(error)
     }
   },
 }
-export default apiAuthService
+
+export default ApiAuthService

@@ -1,7 +1,38 @@
+"use client"
+import { useQueryClient } from "react-query"
+import { useLogin } from "@/app/hooks/auth.hooks"
+import { ApolloError } from "@apollo/client"
+import { setCookie } from "cookies-next"
+
 export default function SignIn() {
+  const queryClient = useQueryClient()
+  const login = useLogin()
+
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get("email") as string
+    const pwd = formData.get("password") as string
+
+    login.mutate(
+      { email: email, password: pwd },
+      {
+        onSuccess: (data: any) => {
+          queryClient.invalidateQueries("getProfile")
+          setCookie("xToken", data.login)
+          console.log(data.login)
+        },
+        onError: (error: ApolloError | unknown) => {
+          error instanceof ApolloError ? console.error(error.message) : console.error(error)
+        },
+      },
+    )
+  }
+
   return (
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form className="space-y-6" action="#" method="POST">
+      <form className="space-y-6" action="#" method="POST" onSubmit={handleLogin}>
         <div>
           <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
             Email address

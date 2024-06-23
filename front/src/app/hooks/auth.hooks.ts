@@ -1,10 +1,18 @@
-import { signUp, login } from "../services/auth.service"
-import { useMutation } from "react-query"
+import ApiAuthService from "../services/auth.service"
+import { useMutation, useQuery } from "react-query"
 
 export const useSignUp = () => {
-  return useMutation(signUp)
+  return useMutation(ApiAuthService.signUp)
 }
 
 export const useLogin = () => {
-  return useMutation(login)
+  return useMutation(ApiAuthService.login)
+}
+
+export const useGetUser = () => {
+  return useQuery({
+    queryKey: "getProfile",
+    queryFn: ApiAuthService.getUser,
+    enabled: false,
+  })
 }
